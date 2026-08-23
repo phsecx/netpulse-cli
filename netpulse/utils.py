@@ -29,7 +29,7 @@ def normalizeTarget(value: str) -> str | None:
 
 
 def resultLabel(result: dict[str, Any]) -> str:
-    """Create a short Roman Urdu status label for terminal output."""
+    """Create a short status label for terminal output."""
 
     if result.get("error"):
         return "ERROR"
@@ -52,7 +52,7 @@ def markdownReport(results: Iterable[dict[str, Any]], createdAt: str | None = No
         "",
         f"> Report generated: `{created}`",
         "",
-        "Netpulse ne website response, SSL certificate, aur security headers ko audit kiya hai.",
+        "Netpulse audited the website response, SSL certificate, and security headers.",
         "",
         "## Summary",
         "",

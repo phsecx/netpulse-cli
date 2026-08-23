@@ -66,19 +66,19 @@ async def fetchResponse(
     except asyncio.TimeoutError:
         return {
             "ok": False,
-            "error": "Request timeout ho gaya",
+            "error": "Request timed out",
             "responseTimeMs": round((time.perf_counter() - started) * 1000, 2),
         }
     except aiohttp.ClientError as exc:
         return {
             "ok": False,
-            "error": f"Website response nahi mili: {exc.__class__.__name__}",
+            "error": f"No HTTP response received: {exc.__class__.__name__}",
             "responseTimeMs": round((time.perf_counter() - started) * 1000, 2),
         }
     except Exception as exc:
         return {
             "ok": False,
-            "error": f"Unexpected response error: {exc.__class__.__name__}",
+            "error": f"Unexpected HTTP response error: {exc.__class__.__name__}",
             "responseTimeMs": round((time.perf_counter() - started) * 1000, 2),
         }
 
@@ -96,16 +96,16 @@ def parseCertDate(value: str | None) -> str | None:
 
 
 async def checkSsl(target: str, timeout: float) -> dict[str, Any]:
-    """Open a TLS connection and inspect certificate dates, even for an invalid cert."""
+    """Open a verified TLS connection and inspect the certificate validity dates."""
 
     parsed = urlparse(target)
     if parsed.scheme != "https":
-        return {"checked": False, "secure": False, "message": "HTTPS use nahi ho raha"}
+        return {"checked": False, "secure": False, "message": "HTTPS is not in use"}
 
     host = parsed.hostname
     port = parsed.port or 443
     if not host:
-        return {"checked": False, "secure": False, "message": "Hostname missing hai"}
+        return {"checked": False, "secure": False, "message": "Hostname is missing"}
 
     context = ssl.create_default_context()
     writer: asyncio.StreamWriter | None = None
@@ -139,21 +139,21 @@ async def checkSsl(target: str, timeout: float) -> dict[str, Any]:
             "expiresInDays": expiresInDays,
             "issuer": cert.get("issuer", ""),
             "subject": cert.get("subject", ""),
-            "message": "SSL Certificate theek hai" if not expired else "SSL Certificate expire ho chuka hai",
+            "message": "SSL certificate is valid" if not expired else "SSL certificate has expired",
         }
     except asyncio.TimeoutError:
-        return {"checked": True, "secure": False, "error": "SSL handshake timeout ho gaya"}
+        return {"checked": True, "secure": False, "error": "SSL handshake timed out"}
     except (OSError, socket.gaierror) as exc:
         return {
             "checked": True,
             "secure": False,
-            "error": f"SSL connection nahi bani: {exc.__class__.__name__}",
+            "error": f"SSL connection failed: {exc.__class__.__name__}",
         }
     except Exception as exc:
         return {
             "checked": True,
             "secure": False,
-            "error": f"SSL audit fail hua: {exc.__class__.__name__}",
+            "error": f"SSL audit failed: {exc.__class__.__name__}",
         }
     finally:
         if writer:
@@ -182,9 +182,9 @@ def auditHeaders(headers: dict[str, Any], target: str) -> dict[str, Any]:
         },
     }
     if urlparse(target).scheme != "https":
-        checks["hsts"]["message"] = "HTTPS ke baghair HSTS effective nahi hota"
+        checks["hsts"]["message"] = "HSTS is ineffective without HTTPS"
     else:
-        checks["hsts"]["message"] = "HSTS enabled hai" if checks["hsts"]["present"] else "HSTS missing hai"
+        checks["hsts"]["message"] = "HSTS is enabled" if checks["hsts"]["present"] else "HSTS is missing"
 
     presentCount = sum(1 for item in checks.values() if item["present"])
     return {
@@ -208,7 +208,7 @@ async def scanTarget(
         return AuditResult(
             target=target,
             checkedAt=checkedAt,
-            error="Target valid URL nahi hai",
+            error="Target is not a valid URL",
         )
 
     responseTask = asyncio.create_task(fetchResponse(normalized, session))

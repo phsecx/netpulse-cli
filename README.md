@@ -1,24 +1,28 @@
 # netpulse-cli
 
-`netpulse-cli` ek fast, asynchronous network security aur SSL auditor hai. Yeh Python 3.10+ par chalta hai aur multiple websites ko concurrently inspect karta hai. Har target ke liye HTTP response status, response time, redirect behavior, SSL certificate expiry, aur teen important security headers check hote hain: HSTS, CSP, aur X-Frame-Options.
+`netpulse-cli` is a fast, asynchronous network security and SSL auditing utility for Python 3.10 and newer. It concurrently inspects multiple websites and records HTTP response behavior, TLS certificate expiration data, and the presence of three important security headers: HSTS, Content-Security-Policy, and X-Frame-Options.
 
-> **Safe use:** Sirf un websites ya systems ko scan karein jinhein scan karne ki aapko permission hai. Yeh tool lightweight audit ke liye bana hai, penetration testing ya vulnerability exploitation ke liye nahi.
+> **Authorized use:** Scan only websites or systems for which you have explicit permission. This utility performs a lightweight configuration audit; it is not a penetration-testing or vulnerability-exploitation framework.
+
+## Language separation
+
+All repository documentation, report content, code comments, identifiers, docstrings, function definitions, and Git metadata use formal technical English. The command-line interface intentionally uses friendly Roman Urdu / Hinglish for progress messages, alerts, and terminal-facing errors.
 
 ## Features
 
 | Capability | Details |
 | --- | --- |
-| Concurrent scanning | `asyncio`, `aiohttp`, aur configurable concurrency limit |
-| Website response | HTTP status, final URL, redirects, content type, response time |
-| SSL audit | TLS handshake, certificate validity dates, expiry countdown, issuer and subject |
-| Header audit | HSTS, Content-Security-Policy, aur X-Frame-Options presence and score |
-| Reports | Markdown, JSON, ya dono formats |
-| Friendly CLI | Natural Roman Urdu / English progress and alert messages |
-| Input sources | Direct targets ya newline-separated target file |
+| Concurrent scanning | Uses `asyncio`, `aiohttp`, and a configurable concurrency limit. |
+| Website response audit | Records HTTP status, final URL, redirect behavior, content type, response time, and response headers. |
+| SSL audit | Performs a TLS handshake and records certificate validity dates, expiry countdown, issuer, and subject. |
+| Security-header audit | Checks HSTS, Content-Security-Policy, and X-Frame-Options and calculates a percentage score. |
+| Report generation | Produces Markdown, JSON, or both report formats. |
+| Input sources | Accepts direct targets or a newline-separated target file. |
+| CLI output | Provides friendly Roman Urdu / Hinglish progress and alert messages. |
 
 ## Installation
 
-Python 3.10 ya newer install karein, phir project directory mein dependencies install karein:
+Install Python 3.10 or newer, create a virtual environment, and install the runtime dependency:
 
 ```bash
 python3 -m venv .venv
@@ -28,39 +32,34 @@ python -m pip install -r requirements.txt
 
 ## Quick start
 
-Ek ya multiple targets scan karein:
+Scan one or more targets:
 
 ```bash
 python -m netpulse.main example.com https://www.python.org
 ```
 
-CLI messages simple aur friendly honge, misal ke taur par:
+The terminal interface provides Roman Urdu / Hinglish status messages, including scan progress, certificate alerts, and report locations.
 
-```text
-[+] Website scan ho rahi hai: 2 target(s), concurrency 20.
-[+] https://example.com: HTTP 200, response 84.21 ms, SSL days left 71.
-[!] Alert: SSL Certificate expire hone wala hai!
-[+] Report ready hai: reports/netpulse-report-20260823-120000.md
-```
-
-Targets file se scan karne ke liye:
+Scan targets from a file:
 
 ```bash
 python -m netpulse.main --file targets.txt --format both --output reports
 ```
 
-## Options
+The input file accepts one hostname or HTTP(S) URL per line. Empty lines and lines beginning with `#` are ignored.
 
-| Option | Default | Purpose |
+## Command-line options
+
+| Option | Default | Description |
 | --- | ---: | --- |
-| `targets` | — | Direct hostnames ya HTTP(S) URLs |
-| `--file` | — | Newline-separated targets; `#` se shuru hone wali lines ignore hoti hain |
-| `--format` | `both` | `markdown`, `json`, ya `both` |
-| `--output` | `reports` | Report files ka destination folder |
-| `--concurrency` | `20` | Ek waqt mein maximum scans |
-| `--timeout` | `10` | Request aur TLS timeout seconds mein |
+| `targets` | — | Direct hostnames or HTTP(S) URLs. |
+| `--file` | — | A newline-separated target file. |
+| `--format` | `both` | Select `markdown`, `json`, or `both`. |
+| `--output` | `reports` | Destination directory for generated reports. |
+| `--concurrency` | `20` | Maximum number of targets processed concurrently. |
+| `--timeout` | `10` | Request and TLS timeout in seconds. |
 
-Example with conservative settings:
+Example with conservative network settings:
 
 ```bash
 python -m netpulse.main \
@@ -71,9 +70,9 @@ python -m netpulse.main \
   --output audit-output
 ```
 
-## Reports
+## Report format
 
-Markdown report mein summary table aur har target ki detailed findings hoti hain. JSON report machine-readable payload deta hai:
+The Markdown report contains a summary table and detailed findings for each target. The JSON report provides a machine-readable object with the tool name, generation timestamp, and result list:
 
 ```json
 {
@@ -83,7 +82,7 @@ Markdown report mein summary table aur har target ki detailed findings hoti hain
 }
 ```
 
-SSL result mein `expiresInDays` field expiry countdown deti hai. Thirty days ya us se kam expiry par CLI alert print karta hai. Header score teen required headers mein present headers ka percentage hai.
+The SSL result includes `expiresInDays`, which represents the certificate expiry countdown. The CLI displays an alert when a certificate is expired or has 30 days or fewer remaining. The security-header score is the percentage of required headers that are present.
 
 ## Project layout
 
@@ -102,11 +101,11 @@ netpulse-cli/
     └── main.py
 ```
 
-`netpulse/core.py` asynchronous network checks rakhta hai. `netpulse/utils.py` input normalization aur report rendering handle karta hai. `netpulse/main.py` CLI arguments, progress output, aur exit codes manage karta hai.
+`netpulse/core.py` contains the asynchronous network checks. `netpulse/utils.py` provides target normalization and report rendering. `netpulse/main.py` handles command-line arguments, terminal output, and exit codes.
 
 ## Tests
 
-Repository root se tests run karein:
+Run the test suite from the repository root:
 
 ```bash
 python -m unittest discover -s tests -p 'test*.py' -v
@@ -114,4 +113,4 @@ python -m unittest discover -s tests -p 'test*.py' -v
 
 ## License
 
-MIT License. Details ke liye [LICENSE](LICENSE) file dekhein.
+This project is distributed under the MIT License. See [LICENSE](LICENSE) for the complete terms.

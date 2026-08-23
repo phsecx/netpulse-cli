@@ -11,22 +11,44 @@ from .core import ScanConfig, scanTargets
 from .utils import normalizeTarget, writeReportFiles
 
 
+class FriendlyParser(argparse.ArgumentParser):
+    """Provide Hinglish help and validation output for terminal users."""
+
+    def format_help(self) -> str:
+        helpText = super().format_help()
+        replacements = {
+            "usage:": "istemaal:",
+            "positional arguments:": "targets:",
+            "options:": "maujood options:",
+            "show this help message and exit": "help message dikhayein aur band ho jayein",
+        }
+        for source, replacement in replacements.items():
+            helpText = helpText.replace(source, replacement)
+        return helpText
+
+    def error(self, message: str) -> None:
+        del message
+        self.exit(2, "[!] Input samajhne mein masla aa gaya. --help se options dekhein.\n")
+
+
 def buildParser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
+    parser = FriendlyParser(
         prog="netpulse",
-        description="Fast website response, SSL aur security-header auditor.",
+        add_help=False,
+        description="Fast website response, SSL aur security-header audit tool.",
     )
-    parser.add_argument("targets", nargs="*", help="Website URLs ya hostnames")
-    parser.add_argument("-f", "--file", help="Newline-separated targets ki file")
+    parser.add_argument("targets", nargs="*", help="Website URLs ya hostnames dein")
+    parser.add_argument("-f", "--file", help="Newline-separated targets wali file")
     parser.add_argument(
         "--format",
         choices=("markdown", "json", "both"),
         default="both",
-        help="Report format (default: both)",
+        help="Report format select karein (default: both)",
     )
-    parser.add_argument("-o", "--output", default="reports", help="Report folder")
-    parser.add_argument("-c", "--concurrency", type=int, default=20, help="Concurrent scans")
-    parser.add_argument("-t", "--timeout", type=float, default=10.0, help="Timeout seconds")
+    parser.add_argument("-o", "--output", default="reports", help="Reports kis folder mein save hon")
+    parser.add_argument("-c", "--concurrency", type=int, default=20, help="Ek waqt mein scans ki tadaad")
+    parser.add_argument("-t", "--timeout", type=float, default=10.0, help="Timeout seconds mein")
+    parser.add_argument("-h", "--help", action="help", help="Madad ka message dikhayein")
     return parser
 
 
@@ -66,7 +88,7 @@ async def runScan(args: argparse.Namespace) -> int:
         response = result.response
         sslInfo = result.ssl
         if result.error:
-            print(f"[!] {result.target}: {result.error}")
+            print(f"[!] {result.target}: Scan mein masla aa gaya. Details report mein dekhein.")
             continue
         status = response.get("statusCode", "-")
         days = sslInfo.get("expiresInDays", "-")

@@ -75,7 +75,7 @@ class NetpulseTests(unittest.TestCase):
             "target": "https://example.com",
             "checkedAt": "2026-01-01T00:00:00+00:00",
             "response": {"ok": True, "statusCode": 200, "responseTimeMs": 20},
-            "ssl": {"secure": True, "expiresInDays": 90, "message": "SSL Certificate theek hai"},
+            "ssl": {"secure": True, "expiresInDays": 90, "message": "SSL certificate is valid"},
             "headers": {"score": 100, "checks": {}},
             "error": None,
         }]
