@@ -1,4 +1,6 @@
 # netpulse-cli
+[![Tests](https://github.com/phsecx/netpulse-cli/actions/workflows/tests.yml/badge.svg)](https://github.com/phsecx/netpulse-cli/actions/workflows/tests.yml)
+
 
 `netpulse-cli` is a fast, asynchronous network security and SSL auditing utility for Python 3.10 and newer. It concurrently inspects multiple websites and records HTTP response behavior, TLS certificate expiration data, and the presence of three important security headers: HSTS, Content-Security-Policy, and X-Frame-Options.
 
